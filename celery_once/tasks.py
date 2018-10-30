@@ -4,7 +4,11 @@
 from celery import Task, states
 from celery.result import EagerResult
 from inspect import getcallargs
+import logging
 from .helpers import queue_once_key, import_backend
+
+
+logger = logging.getLogger(__name__)
 
 
 class AlreadyQueued(Exception):
@@ -126,4 +130,5 @@ class QueueOnce(Task):
         # "unlock_before_run" option is False
         if not self.unlock_before_run():
             key = self.get_key(args, kwargs)
+            logger.info("after return - key: {}".format(key))
             self.once_backend.clear_lock(key)

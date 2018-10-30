@@ -12,6 +12,10 @@ except:
     from urllib.parse import urlparse, parse_qsl
 
 from celery_once.tasks import AlreadyQueued
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def parse_url(url):
@@ -94,6 +98,7 @@ class Redis(object):
         the task. By default, the tasks and the key expire after 60 minutes.
         (meaning it will not be executed and the lock will clear).
         """
+        logging.info("Locking key={}, redis={}, timout={}, blocking={}, blocking_timeout={}".format(key, self.redis, timeout, self.blocking, self.blocking_timeout))
         acquired = Lock(
             self.redis,
             key,
@@ -110,4 +115,6 @@ class Redis(object):
 
     def clear_lock(self, key):
         """Remove the lock from redis."""
-        return self.redis.delete(key)
+        res = self.redis.delete(key)
+        logging.info("Clear lock redis result={}".format(res))
+        return res
